@@ -34,16 +34,40 @@ export default function Contact() {
           </div>
 
           <form
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault()
               const btn = e.target.querySelector('button[type="submit"]')
-              btn.textContent = '✓ Sent!'
-              btn.style.background = '#16a34a'
-              setTimeout(() => {
-                btn.textContent = 'Send Message →'
-                btn.style.background = ''
-                e.target.reset()
-              }, 3000)
+              btn.textContent = 'Sending...'
+
+              const formData = {
+                name: e.target.querySelector('input[type="text"]').value,
+                email: e.target.querySelector('input[type="email"]').value,
+                service: e.target.querySelector('select').value,
+                message: e.target.querySelector('textarea').value,
+              }
+
+              const res = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+              })
+
+              if (res.ok) {
+                btn.textContent = '✓ Message Sent!'
+                btn.style.background = '#16a34a'
+                setTimeout(() => {
+                  btn.textContent = 'Send Message →'
+                  btn.style.background = ''
+                  e.target.reset()
+                }, 3000)
+              } else {
+                btn.textContent = 'Failed — Try Again'
+                btn.style.background = '#dc2626'
+                setTimeout(() => {
+                  btn.textContent = 'Send Message →'
+                  btn.style.background = ''
+                }, 3000)
+              }
             }}
             className="flex flex-col gap-5 w-full"
           >
@@ -117,10 +141,10 @@ export default function Contact() {
 
             <div className="flex flex-col gap-2">
               {[
-                { icon: '@',  label: 'Email',    value: 'contact@cubesquarestudio.com', href: 'mailto:contact@cubesquarestudio.com' },
-                { icon: '☎', label: 'Phone',    value: '+91 79724 24480',               href: 'tel:+917972424480' },
-                { icon: '↗', label: 'Website',  value: 'www.cubesquarestudio.com',      href: 'https://www.cubesquarestudio.com' },
-                { icon: '📍', label: 'Location', value: 'Pune, Maharashtra',             href: '#' },
+                { icon: '@', label: 'Email', value: 'contact@cubesquarestudio.com', href: 'mailto:contact@cubesquarestudio.com' },
+                { icon: '☎', label: 'Phone', value: '+91 79724 24480', href: 'tel:+917972424480' },
+                { icon: '↗', label: 'Website', value: 'www.cubesquarestudio.com', href: 'https://www.cubesquarestudio.com' },
+                { icon: '📍', label: 'Location', value: 'Pune, Maharashtra', href: '#' },
               ].map((item) => (
                 <a
                   key={item.label}
@@ -158,9 +182,9 @@ export default function Contact() {
             <div className="flex gap-2 flex-wrap">
               {[
                 { name: 'Instagram', href: 'https://www.instagram.com/cubesquarestudio', hover: 'hover:bg-pink-500/10 hover:text-pink-400 hover:border-pink-500/30' },
-                { name: 'LinkedIn',  href: 'https://www.linkedin.com/in/cubesquare-studio-6a1180248/?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3Bw79vUPvUTji3x0RSIvrwsQ%3D%3D', hover: 'hover:bg-blue-500/10 hover:text-blue-400 hover:border-blue-500/30' },
-                { name: 'Facebook',  href: 'https://www.facebook.com/cubesquarestudio', hover: 'hover:bg-indigo-500/10 hover:text-indigo-400 hover:border-indigo-500/30' },
-                { name: 'YouTube',   href: 'https://www.youtube.com/@cubesquarestudio', hover: 'hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30' },
+                { name: 'LinkedIn', href: 'https://www.linkedin.com/in/cubesquare-studio-6a1180248/?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3Bw79vUPvUTji3x0RSIvrwsQ%3D%3D', hover: 'hover:bg-blue-500/10 hover:text-blue-400 hover:border-blue-500/30' },
+                { name: 'Facebook', href: 'https://www.facebook.com/cubesquarestudio', hover: 'hover:bg-indigo-500/10 hover:text-indigo-400 hover:border-indigo-500/30' },
+                { name: 'YouTube', href: 'https://www.youtube.com/@cubesquarestudio', hover: 'hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30' },
               ].map((s) => (
                 <a
                   key={s.name}
