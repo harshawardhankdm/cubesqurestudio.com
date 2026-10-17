@@ -1,20 +1,44 @@
-import { Syne, Outfit, DM_Mono } from 'next/font/google'
+import { Inter } from 'next/font/google'
+import LenisProvider from '@/components/LenisProvider'
 import './globals.css'
 
-const syne = Syne({ subsets: ['latin'], variable: '--font-head', weight: ['400','500','600','700','800'] })
-const outfit = Outfit({ subsets: ['latin'], variable: '--font-body', weight: ['300','400','500','600'] })
-const dmMono = DM_Mono({ subsets: ['latin'], variable: '--font-mono', weight: ['400','500'] })
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
 
 export const metadata = {
-  title: 'Cubesquare Studio — Creative Digital Agency',
-  description: 'A boutique creative digital agency based in Pune.',
+  title: 'Cubesquare Studio | Creative Digital Agency in Pune',
+  description: 'Cubesquare Studio is a boutique creative digital agency in Pune, India. We deliver personalized strategy, bold design, web development, and measurable growth for brands.',
+  keywords: 'digital agency pune, web design pune, branding agency, social media marketing, cubesquare studio',
+  authors: [{ name: 'Cubesquare Studio' }],
+  openGraph: {
+    title: 'Cubesquare Studio | Creative Digital Agency in Pune',
+    description: 'A boutique of digital art, not a factory. Personalized strategy, bold creativity, and measurable growth.',
+    url: 'https://www.cubesquarestudio.com',
+    siteName: 'Cubesquare Studio',
+    locale: 'en_IN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cubesquare Studio | Creative Digital Agency in Pune',
+    description: 'A boutique of digital art, not a factory. Personalized strategy, bold creativity, and measurable growth.',
+  },
+  metadataBase: new URL('https://www.cubesquarestudio.com'),
 }
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={`${syne.variable} ${outfit.variable} ${dmMono.variable}`}>
-        {children}
+    <html lang="en" className={inter.variable}>
+      <head>
+        <link rel="icon" href="/images/cubesquarestudioicon.png" type="image/png" />
+      </head>
+      <body>
+        <LenisProvider>
+          {children}
+        </LenisProvider>
       </body>
     </html>
   )

@@ -1,116 +1,283 @@
 'use client'
-import { useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
+import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react'
+import { ChevronDown } from 'lucide-react'
+import { Container } from '@/components/ui/Container'
+import { Magnetic, CountUp, EASINGS, useMotionTier } from '@/lib/motion'
+import Key from '@/components/ui/Key'
+import Tesseract from '@/components/hero/Tesseract'
+import HeroParticles from '@/components/HeroParticles'
+import HeroSatellites from '@/components/HeroSatellites'
+import HeroMorphBlob from '@/components/HeroMorphBlob'
+import { TypewriterLoop } from '@/components/motion/text'
+import ArrowMorph from '@/components/motion/ArrowMorph'
+
+const STATS = [
+  { value: 200, suffix: '+', label: 'Projects Done', strokePercent: 92 },
+  { value: 50,  suffix: '+', label: 'Happy Clients', strokePercent: 88 },
+  { value: 6,   suffix: '+', label: 'Years Active', strokePercent: 78 },
+]
 
 export default function Hero() {
-  const canvasRef = useRef(null)
+  const tier = useMotionTier()
+  const { scrollY } = useScroll()
+  const [isBtn1Hovered, setIsBtn1Hovered] = useState(false)
+  const [isBtn2Hovered, setIsBtn2Hovered] = useState(false)
+
+  // Decorative scroll cue fade only (does not affect any text or buttons)
+  const scrollIndicatorOpacity = useTransform(scrollY, [0, 120], [1, 0])
+
+  // Status pill flip state (every 5 seconds)
+  const [pillState, setPillState] = useState(0) // 0: accepting clients, 1: pune local time
+  const [puneTime, setPuneTime] = useState('')
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const cells = []
-    for (let i = 0; i < 72; i++) {
-      const c = document.createElement('div')
-      c.style.cssText = 'background:#161616;border-radius:2px;transition:background 0.6s;'
-      canvas.appendChild(c)
-      cells.push(c)
+    const updateTime = () => {
+      const now = new Date()
+      // Convert to IST (UTC+5:30)
+      const istString = now.toLocaleTimeString('en-US', {
+        timeZone: 'Asia/Kolkata',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      })
+      setPuneTime(`Pune \u00B7 ${istString} IST`)
     }
-    const flash = setInterval(() => {
-      const n = Math.floor(Math.random() * cells.length)
-      cells[n].style.background = Math.random() > .5 ? '#0891e2' : Math.random() > .5 ? '#0670b8' : '#1f2a38'
-      setTimeout(() => { cells[n].style.background = '#161616' }, 800 + Math.random() * 1200)
-    }, 120)
-    return () => clearInterval(flash)
+
+    updateTime()
+    const timeInterval = setInterval(updateTime, 30000)
+    const pillInterval = setInterval(() => {
+      setPillState((prev) => (prev === 0 ? 1 : 0))
+    }, 5000)
+
+    return () => {
+      clearInterval(timeInterval)
+      clearInterval(pillInterval)
+    }
   }, [])
 
   return (
-    <section className="min-h-screen pt-[100px] grid grid-cols-1 md:grid-cols-2 overflow-hidden">
+    <section
+      id="main-content"
+      className="relative min-h-[96svh] flex flex-col justify-center items-center overflow-hidden pt-28 sm:pt-36 pb-20 sm:pb-28"
+    >
+      {/* Interactive 2D Canvas Particle Field (High Tier) */}
+      <HeroParticles />
 
-      {/* Left */}
-      <div className="flex flex-col justify-center px-8 py-16 md:px-14 md:py-20 animate-[heroIn_0.9s_0.2s_ease_both]">
+      {/* Restrained Single Ambient Aurora Glow */}
+      <span
+        className="pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[640px] max-w-[90vw] h-[360px] bg-gradient-to-tr from-[#0058CC]/14 via-[#8B5CF6]/10 to-transparent blur-[100px] rounded-full block"
+        aria-hidden="true"
+      />
 
-        {/* Eyebrow */}
-        <div className="flex items-center gap-2 font-[family-name:var(--font-mono)] text-[0.72rem] tracking-[0.14em] text-[#0891e2] uppercase mb-8">
-          <span className="w-5 h-[2px] bg-[#0891e2] inline-block flex-shrink-0"></span>
-          Creative Digital Agency · Pune
-        </div>
+      <Container className="relative z-10 flex flex-col items-center text-center">
+        <div className="flex flex-col items-center w-full">
+          {/* Headline and Hero Center Zone (Zero scroll-opacity reduction) */}
+          <div className="flex flex-col items-center w-full">
+            {/* Status Pill Badge with Real Inset LED & Vertical Roll */}
+            <motion.div
+              initial={{ opacity: 0, y: 16, scale: 0.94 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.5, ease: EASINGS.easeOutExpo }}
+              className="mb-5 sm:mb-7"
+            >
+              <div className="glass-pill relative inline-flex items-center gap-2.5 px-5 py-2 text-[13px] font-medium text-[#5E5E63] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_2px_8px_rgba(0,0,0,0.06)] min-h-[36px]">
+                <span className="led-dot animate-pulse" />
+                <div className="min-w-[180px] sm:min-w-[210px] text-left overflow-hidden h-[20px] relative">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={pillState}
+                      initial={{ y: 14 }}
+                      animate={{ y: 0 }}
+                      exit={{ y: -14 }}
+                      transition={{ duration: 0.28, ease: EASINGS.easeOutExpo }}
+                      className="whitespace-nowrap"
+                    >
+                      {pillState === 0 ? (
+                        <span className="text-[#1D1D1F] font-semibold">
+                          Currently Accepting Clients
+                        </span>
+                      ) : (
+                        <span className="text-[#0058CC] font-mono font-semibold tabular-nums">
+                          {puneTime || 'Pune \u00B7 Studio Active'}
+                        </span>
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </div>
+            </motion.div>
 
-        {/* Heading */}
-        <h1
-          className="font-[family-name:var(--font-head)] font-extrabold leading-[1.0] tracking-tight mb-6"
-          style={{ fontSize: 'clamp(2.4rem, 5vw, 5.5rem)' }}
-        >
-          WE TURN<br />
-          <span className="text-[#0891e2]">VISIONS</span><br />
-          INTO <span style={{ WebkitTextStroke: '2px #0a0a0a', color: 'transparent' }}>RESULTS</span>
-        </h1>
+            {/* Eyebrow with Typewriter service loop */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.08, ease: EASINGS.easeOutExpo }}
+              className="mb-4 sm:mb-5 flex flex-wrap items-center justify-center gap-2"
+            >
+              <span className="text-eyebrow">
+                Creative Digital Agency &bull;
+              </span>
+              <TypewriterLoop className="text-[12px] tracking-wider uppercase" />
+            </motion.div>
 
-        {/* Description */}
-        <p className="font-[family-name:var(--font-body)] text-[1rem] font-light text-[#6b7280] max-w-md mb-10 leading-[1.85]">
-          A boutique of digital art — not a factory. We bring personalized strategy, bold creativity, and measurable growth to every client we work with.
-        </p>
-
-        {/* Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3">
-
-          {/* Primary — See Our Work */}
-          <a
-            href="#work"
-            className="group relative inline-flex items-center justify-center gap-2 no-underline overflow-hidden rounded-xl px-7 py-4 bg-[#0891e2] transition-all duration-300 hover:bg-[#0670b8] hover:shadow-[0_8px_30px_rgba(8,145,226,0.35)] hover:-translate-y-0.5"
-          >
-            <span className="font-[family-name:var(--font-head)] text-[0.88rem] font-bold tracking-wide text-white">
-              See Our Work
-            </span>
-            <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white/20 text-white text-[0.85rem] transition-all duration-300 group-hover:bg-white/30 group-hover:translate-x-0.5">
-              →
-            </span>
-          </a>
-
-          {/* Secondary — Start a Project */}
-          <a
-            href="#contact"
-            className="group inline-flex items-center justify-center gap-2 no-underline rounded-xl px-7 py-4 border-2 border-[#0a0a0a] text-[#0a0a0a] transition-all duration-300 hover:border-[#0891e2] hover:text-[#0891e2] hover:bg-[#0891e2]/5 hover:-translate-y-0.5"
-          >
-            <span className="font-[family-name:var(--font-head)] text-[0.88rem] font-bold tracking-wide">
-              Start a Project
-            </span>
-            <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg border border-current text-[0.85rem] transition-all duration-300 group-hover:translate-x-0.5">
-              ↗
-            </span>
-          </a>
-
-        </div>
-
-        {/* Stats */}
-        <div className="flex gap-10 mt-12 pt-8 border-t border-[#e5e5e0]">
-          {[['200+', 'Projects Done'], ['50+', 'Happy Clients'], ['6+', 'Years Active']].map(([num, label]) => (
-            <div key={label}>
-              <div className="font-[family-name:var(--font-head)] text-[2.2rem] font-extrabold text-[#0891e2] leading-none">{num}</div>
-              <div className="text-[0.78rem] text-[#6b7280] mt-1">{label}</div>
+            {/* Hero Headline: Progressive reveals + gradient liquid shimmer */}
+            <div className="w-full max-w-[1020px] mb-6 sm:mb-8">
+              <h1 className="text-hero">
+                <motion.span
+                  initial={{ y: 20, opacity: 0, filter: 'blur(8px)' }}
+                  animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+                  transition={{ duration: 0.7, delay: 0.16, ease: EASINGS.easeOutExpo }}
+                  className="block text-[#1D1D1F]"
+                >
+                  We turn bold visions into
+                </motion.span>
+                <motion.span
+                  initial={{ y: 20, opacity: 0, filter: 'blur(8px)' }}
+                  animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+                  transition={{ duration: 0.7, delay: 0.24, ease: EASINGS.easeOutExpo }}
+                  className="block"
+                >
+                  <span className="relative inline-block font-extrabold bg-gradient-to-r from-[#0058CC] via-[#1A73E8] to-[#8B5CF6] bg-clip-text text-transparent animate-text-shimmer">
+                    measurable results.
+                  </span>
+                </motion.span>
+              </h1>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Right — Cube canvas */}
-      <div className="relative bg-[#0a0a0a] overflow-hidden min-h-[50vw] md:min-h-0">
-        <div
-          ref={canvasRef}
-          className="absolute inset-0 grid gap-[3px] p-[3px]"
-          style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}
-        />
-        {/* Overlay card */}
-        <div className="absolute bottom-10 left-10 bg-[#0891e2] text-white px-8 py-5 rounded-xl">
-          <div className="font-[family-name:var(--font-head)] text-[2.8rem] font-extrabold leading-none">360°</div>
-          <div className="text-[0.78rem] opacity-85 mt-1 tracking-widest">DIGITAL SOLUTIONS</div>
+            {/* Lead description: Plain fully-contrasted text with one-time entrance */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.28, ease: EASINGS.easeOutExpo }}
+              className="mb-6 sm:mb-8 max-w-2xl mx-auto"
+            >
+              <p className="text-lead text-[18px] sm:text-[20px] leading-[1.55] max-w-[60ch] mx-auto text-[#3A3A3C]">
+                A boutique of digital art — not a factory. We deliver personalized brand strategy, high-converting web platforms, and organic growth for brands that refuse to blend in.
+              </p>
+            </motion.div>
+
+            {/* 4D Tesseract Canvas with Morphing Glow & Orbiting Satellites */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.7, delay: 0.36, ease: EASINGS.easeOutExpo }}
+              className="relative flex items-center justify-center my-3 w-full"
+            >
+              <HeroMorphBlob />
+              <HeroSatellites />
+              <Tesseract />
+            </motion.div>
+          </div>
+
+          {/* Buttons Zone: Physical Skeuomorphic Keys (Always 100% full opacity while visible) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.48, ease: EASINGS.easeOutExpo }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-5 w-full sm:w-auto mb-16 sm:mb-20 mt-4"
+          >
+            <Magnetic strength={0.28}>
+              <Key
+                href="#work"
+                variant="accent"
+                size="lg"
+                onMouseEnter={() => setIsBtn1Hovered(true)}
+                onMouseLeave={() => setIsBtn1Hovered(false)}
+                className="w-full sm:w-auto"
+              >
+                <span>See Our Work</span>
+                <ArrowMorph
+                  type="horizontal"
+                  size={18}
+                  strokeWidth={2.4}
+                  isHovered={isBtn1Hovered}
+                />
+              </Key>
+            </Magnetic>
+
+            <Magnetic strength={0.22}>
+              <Key
+                href="#contact"
+                variant="light"
+                size="lg"
+                onMouseEnter={() => setIsBtn2Hovered(true)}
+                onMouseLeave={() => setIsBtn2Hovered(false)}
+                className="w-full sm:w-auto"
+              >
+                <span>Start a Project</span>
+                <ArrowMorph
+                  type="diagonal"
+                  size={17}
+                  strokeWidth={2.2}
+                  isHovered={isBtn2Hovered}
+                />
+              </Key>
+            </Magnetic>
+          </motion.div>
+
+          {/* Real Stats Row (Always 100% opacity, glass-strong opaque fill, dark numbers, clear spacing) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.56, ease: EASINGS.easeOutExpo }}
+            className="w-full max-w-3xl pt-8 border-t border-[rgba(0,0,0,0.08)] grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6"
+          >
+            {STATS.map((s) => (
+              <div
+                key={s.label}
+                className="glass-strong relative overflow-hidden p-6 sm:p-7 rounded-[24px] flex flex-col items-center hover:-translate-y-1 transition-all duration-200"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.92)',
+                  boxSizing: 'border-box',
+                }}
+              >
+                {/* Reserved progress arc space above numbers to prevent intersection */}
+                <div className="w-full h-7 flex justify-center mb-1">
+                  <svg
+                    className="w-24 h-7 pointer-events-none opacity-40"
+                    viewBox="0 0 100 28"
+                  >
+                    <motion.path
+                      d="M 10,24 A 40,40 0 0,1 90,24"
+                      fill="none"
+                      stroke="#0058CC"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      initial={{ pathLength: 0 }}
+                      whileInView={{ pathLength: s.strokePercent / 100 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1.4, ease: EASINGS.easeOutExpo }}
+                    />
+                  </svg>
+                </div>
+
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#1D1D1F] leading-none mb-2 drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]">
+                  <CountUp to={s.value} suffix="" duration={1.3} />
+                  <span className="text-[#0058CC]">{s.suffix}</span>
+                </div>
+                <div className="text-[15px] font-medium text-[#3A3A3C]">
+                  {s.label}
+                </div>
+              </div>
+            ))}
+          </motion.div>
+
+          {/* Floating Subtle Scroll Cue */}
+          <motion.div
+            style={{ opacity: scrollIndicatorOpacity }}
+            className="mt-12 hidden sm:flex flex-col items-center gap-1.5 text-[#5E5E63] text-[12px] font-medium tracking-wider uppercase pointer-events-none"
+          >
+            <span>Scroll to explore</span>
+            <motion.div
+              animate={{ y: [0, 5, 0] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <ChevronDown size={15} />
+            </motion.div>
+          </motion.div>
         </div>
-        {/* Tag */}
-        <div className="absolute top-8 right-8 border border-white/10 px-4 py-3 rounded-xl bg-white/5 backdrop-blur-sm">
-          <span className="font-[family-name:var(--font-mono)] text-[0.72rem] text-white/70 flex items-center gap-2">
-            <span className="w-2 h-2 bg-green-500 rounded-full inline-block animate-pulse"></span>
-            Currently Accepting Clients
-          </span>
-        </div>
-      </div>
+      </Container>
     </section>
   )
 }
